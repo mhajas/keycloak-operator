@@ -157,6 +157,12 @@ func (r *ReconcileKeycloak) Reconcile(request reconcile.Request) (reconcile.Resu
 	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
 	reqLogger.Info("Reconciling Keycloak")
 
+	stateManager := common.GetStateManager()
+	_, keyExists := stateManager.GetState(common.RouteKind).(bool)
+	if !keyExists {
+		return reconcile.Result{RequeueAfter: RequeueDelaySeconds}, nil
+	}
+
 	// Fetch the Keycloak instance
 	instance := &keycloakv1alpha1.Keycloak{}
 	err := r.client.Get(r.context, request.NamespacedName, instance)
